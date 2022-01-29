@@ -1,9 +1,14 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <AsyncTCP.h>
 #include <WiFiConfig.h> //wifi settings
 #include <string>
-const int LED = 5;
+#include <cstring>
+#include <ESPAsyncWebServer.h>
+using namespace std;
 
+
+const int LED = 5;
 char *letters[] = {
   // The letters A-Z in Morse code  
   ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..",    
@@ -39,9 +44,27 @@ void ConnectToWifi(){
   Serial.println(WiFi.localIP());
 }
 
+const char index_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html><head>
+  <title>HTML Form to Input Data</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cyborg/bootstrap.min.css">
+  </head><body class="bootstrap-dark m-1">
+  <h2>HTML Form to Input Data</h2> 
+  <form method="post">
+    Enter a string: <input type="text" name="input_string">
+    <input type="submit" value="Submit">
+  </form><br>
+  </body></html>
+)rawliteral";
+
+
+AsyncWebServer server(80);
+
 
 unsigned int dot_duration = 25;
 bool done = false;
+const char* string_to_convert;
 
 void flash_dot_or_dash(char dot_or_dash);
 void flash_morse_code(char *morse_code);
@@ -53,6 +76,19 @@ void setup() {
   Serial.begin(9600);
   Serial.println("begin");
   ConnectToWifi();
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html);
+    Serial.println("connecter qqn");
+  });
+  server.on("/", HTTP_POST, [](AsyncWebServerRequest *request){
+    if (request->hasParam("input_string"))
+    {
+      const char* input_message = request->getParam("input_string")->value().c_str();
+      Serial.println(input_message);
+    }
+    request->send_P(200, "text/html", index_html);
+  });
+  server.begin();
   Serial.println("Morse2Led");
   Serial.println("Programmed by Addison Sears-Collins");
   Serial.println("Copied and adapted by Alexis Leclerc");
@@ -62,21 +98,10 @@ void setup() {
 
 
 void loop() {
-  char ch;
 
-  std::string phrase = "";
+  string phrase = "";
 
-    while(!done){
-      if (Serial.available())
-      {
-        ch = Serial.read();
 
-        if (ch == '\n')
-        {
-          unsigned int i = 0;
-
-          Serial.println("");
-          phrase += '&';
           for(char const &c: phrase)
           {
             if (c >= 'A' && c <= 'Z')
@@ -113,14 +138,6 @@ void loop() {
               break;
             }
           }
-        }
-        else{
-          Serial.print(ch);
-          phrase += ch;
-        }
-      }
-    }
-
     while(true) {}
 }
 
