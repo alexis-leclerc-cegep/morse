@@ -48,44 +48,48 @@ void loop() {
         {
           unsigned int i = 0;
 
+          Serial.println("");
+          phrase += '&';
           for(char const &c: phrase)
           {
-            Serial.println(c);
             if (c >= 'A' && c <= 'Z')
             {
-              Serial.println(c);
+              Serial.print(c);
               flash_morse_code(letters[c - 'A']);
             }
             else if (c >= 'a' && c <= 'z')
             {
-              Serial.println(c);
+              Serial.print(c);
               flash_morse_code(letters[c - 'a']);
             }
             else if (c >= '0' && c <= '9')
             {
-              Serial.println(c);
+              Serial.print(c);
               flash_morse_code(letters[c - '0']);
             }
 
             else if (c == ' ')
             {
               delay(dot_duration * 7);
-              Serial.println(" ");
+              Serial.print(" ");
             }
             
             else if (c == '!')
             {
               done = true;
-              Serial.println("bonne soirer");
+              Serial.print("bonne soirer");
             }
             else if (c == '&')
             {
-              Serial.println("GROS CACA ");
+              Serial.print("\nEnter your message : ");
+              phrase = "";
+              break;
             }
           }
-
-          phrase = "";
-          Serial.println("enter message : ");
+        }
+        else{
+          Serial.print(ch);
+          phrase += ch;
         }
       }
     }
