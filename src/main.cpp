@@ -15,7 +15,7 @@ char *numbers[] = {
   "--...", "---..", "----."
 };
 
-unsigned int dot_duration = 50;
+unsigned int dot_duration = 25;
 bool done = false;
 
 void flash_dot_or_dash(char dot_or_dash);
@@ -70,7 +70,7 @@ void loop() {
 
             else if (c == ' ')
             {
-              delay(dot_duration * 7);
+              delay(dot_duration * 5);
               Serial.print(" ");
             }
             
