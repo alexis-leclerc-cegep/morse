@@ -51,7 +51,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cyborg/bootstrap.min.css">
   </head><body class="bootstrap-dark m-1">
   <h2>HTML Form to Input Data</h2> 
-  <form method="post">
+  <form method="get">
     Enter a string: <input type="text" name="input_string">
     <input type="submit" value="Submit">
   </form><br>
@@ -80,7 +80,7 @@ void setup() {
     request->send_P(200, "text/html", index_html);
     Serial.println("connecter qqn");
   });
-  server.on("/", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     if (request->hasParam("input_string"))
     {
       const char* input_message = request->getParam("input_string")->value().c_str();
