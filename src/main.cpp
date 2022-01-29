@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiConfig.h> //wifi settings
 #include <string>
 const int LED = 5;
 
@@ -15,6 +17,29 @@ char *numbers[] = {
   "--...", "---..", "----."
 };
 
+void ConnectToWifi(){
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(SSID, PASSWORD);
+    /* code */
+  Serial.print("Connecting to "); Serial.println(SSID);
+
+  uint8_t i = 0;
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print('.');
+    delay(500);
+
+    if ((++i % 16) == 0)
+    {
+      Serial.println(F(" still trying to connect"));
+    }
+  }
+
+  Serial.print(F("Connected. My IP address is: "));
+  Serial.println(WiFi.localIP());
+}
+
+
 unsigned int dot_duration = 25;
 bool done = false;
 
@@ -26,6 +51,8 @@ void setup() {
   pinMode(LED, OUTPUT);
 
   Serial.begin(9600);
+  Serial.println("begin");
+  ConnectToWifi();
   Serial.println("Morse2Led");
   Serial.println("Programmed by Addison Sears-Collins");
   Serial.println("Copied and adapted by Alexis Leclerc");
