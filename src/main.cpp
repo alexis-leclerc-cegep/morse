@@ -46,13 +46,20 @@ void ConnectToWifi(){
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
-  <title>HTML Form to Input Data</title>
+  <title>String to Morse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/cyborg/bootstrap.min.css">
-  </head><body class="bootstrap-dark m-1">
-  <h2>HTML Form to Input Data</h2> 
-  <form method="get">
-    Enter a string: <input type="text" name="input_string">
+  </head><body class="bootstrap-dark m-3">
+  <h2>String to Morse</h2> 
+  <form action="/get" method="get">
+    <div class="m-3">
+      Enter a string: <input type="text" name="input_string">
+    </div>
+    <br>
+    <!--
+    <div class="m-3">
+      Enter morse base speed: <input type="number" name="input_num">
+    </div> -->
     <input type="submit" value="Submit">
   </form><br>
   </body></html>
@@ -68,6 +75,7 @@ const char* string_to_convert;
 
 void flash_dot_or_dash(char dot_or_dash);
 void flash_morse_code(char *morse_code);
+void string2morse(string phrase);
 
 void setup() {
   // put your setup code here, to run once:
@@ -75,11 +83,8 @@ void setup() {
 
   Serial.begin(9600);
   Serial.println("begin");
+  string2morse("croquette");
   ConnectToWifi();
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html);
-    Serial.println("connecter qqn");
-  });
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     if (request->hasParam("input_string"))
     {
@@ -87,6 +92,18 @@ void setup() {
       Serial.println(input_message);
     }
     request->send_P(200, "text/html", index_html);
+    Serial.println("connecter qqn");
+  });
+  server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html);
+    if (request->hasParam("input_string"))
+    {
+      const char* input_message = request->getParam("input_string")->value().c_str();
+      string string_message;
+      string_message = input_message;
+      Serial.println(input_message);
+      string2morse(string_message);
+    }
   });
   server.begin();
   Serial.println("Morse2Led");
@@ -97,49 +114,49 @@ void setup() {
 }
 
 
-void loop() {
+void loop() {}
 
-  string phrase = "";
+void string2morse(string phrase)
+{
+  Serial.println(phrase.c_str());
+  for(char const &c: phrase)
+  {
+    if (c >= 'A' && c <= 'Z')
+    {
+      Serial.print(c);
+      flash_morse_code(letters[c - 'A']);
+    }
+    else if (c >= 'a' && c <= 'z')
+    {
+      Serial.print(c);
+      flash_morse_code(letters[c - 'a']);
+    }
+    else if (c >= '0' && c <= '9')
+    {
+      Serial.print(c);
+      flash_morse_code(letters[c - '0']);
+    }
 
-
-          for(char const &c: phrase)
-          {
-            if (c >= 'A' && c <= 'Z')
-            {
-              Serial.print(c);
-              flash_morse_code(letters[c - 'A']);
-            }
-            else if (c >= 'a' && c <= 'z')
-            {
-              Serial.print(c);
-              flash_morse_code(letters[c - 'a']);
-            }
-            else if (c >= '0' && c <= '9')
-            {
-              Serial.print(c);
-              flash_morse_code(letters[c - '0']);
-            }
-
-            else if (c == ' ')
-            {
-              delay(dot_duration * 5);
-              Serial.print(" ");
-            }
-            
-            else if (c == '!')
-            {
-              done = true;
-              Serial.print("bonne soirer");
-            }
-            else if (c == '&')
-            {
-              Serial.print("\nEnter your message : ");
-              phrase = "";
-              break;
-            }
-          }
-    while(true) {}
+    else if (c == ' ')
+    {
+      delay(dot_duration * 5);
+      Serial.print(" ");
+    }
+    
+    else if (c == '!')
+    {
+      done = true;
+      Serial.print("bonne soirer");
+    }
+    else if (c == '&')
+    {
+      Serial.print("\nEnter your message : ");
+      phrase = "";
+      break;
+    }
+  }
 }
+
 
 
 
