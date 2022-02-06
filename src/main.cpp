@@ -1,30 +1,15 @@
 #include <Arduino.h>
 #include <string>
+#include "morse.h"
+
 const int LED = 5;
-
-char *letters[] = {
-  // The letters A-Z in Morse code  
-  ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..",    
-  ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.",  
-  "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."         
-};
-
-char *numbers[] = {
-  // The numbers 0-9 in Morse code  
-  "-----", ".----", "..---", "...--", "....-", ".....", "-....", 
-  "--...", "---..", "----."
-};
-
-unsigned int dot_duration = 25;
-bool done = false;
-
-void flash_dot_or_dash(char dot_or_dash);
-void flash_morse_code(char *morse_code);
+char* serialString();
+MyMorse morse(LED, 20);
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(LED, OUTPUT);
 
+  pinMode(LED, OUTPUT);
   Serial.begin(9600);
   Serial.println("Morse2Led");
   Serial.println("Programmed by Addison Sears-Collins");
@@ -35,95 +20,38 @@ void setup() {
 
 
 void loop() {
-  char ch;
-
-  std::string phrase = "";
-
-    while(!done){
-      if (Serial.available())
-      {
-        ch = Serial.read();
-
-        if (ch == '\n')
-        {
-          unsigned int i = 0;
-
-          Serial.println("");
-          phrase += '&';
-          for(char const &c: phrase)
-          {
-            if (c >= 'A' && c <= 'Z')
-            {
-              Serial.print(c);
-              flash_morse_code(letters[c - 'A']);
-            }
-            else if (c >= 'a' && c <= 'z')
-            {
-              Serial.print(c);
-              flash_morse_code(letters[c - 'a']);
-            }
-            else if (c >= '0' && c <= '9')
-            {
-              Serial.print(c);
-              flash_morse_code(letters[c - '0']);
-            }
-
-            else if (c == ' ')
-            {
-              delay(dot_duration * 5);
-              Serial.print(" ");
-            }
-            
-            else if (c == '!')
-            {
-              done = true;
-              Serial.print("bonne soirer");
-            }
-            else if (c == '&')
-            {
-              Serial.print("\nEnter your message : ");
-              phrase = "";
-              break;
-            }
-          }
-        }
-        else{
-          Serial.print(ch);
-          phrase += ch;
-        }
-      }
-    }
-
-    while(true) {}
-}
-
-
-
-void flash_dot_or_dash(char dot_or_dash){
-
-  digitalWrite(LED, HIGH);
-
-  if (dot_or_dash == '.')
-  {
-    delay(dot_duration);
-  }
-  else {
-    delay(dot_duration * 3);
-  }
-
-  digitalWrite(LED, LOW);
-  delay(dot_duration);
-}
-
-void flash_morse_code(char *morse_code)
-{
-    unsigned int i = 0;
-
-    while (morse_code[i] != NULL)
+  static boolean needPrompt=true;
+    char* userInput;
+    if (needPrompt)
     {
-      flash_dot_or_dash(morse_code[i]);
-      i++;
+      Serial.println("Entrez la phrase : ");
+      needPrompt=false;
     }
-    
-    delay(dot_duration * 3);
+    userInput = serialString();
+    if (userInput!=NULL)
+    {
+      morse.flash_string("..-");
+      needPrompt=true;
+    }
+}
+
+
+char* serialString()
+{
+  static char str[21]; // For strings of max length=20
+  if (!Serial.available()) return NULL;
+  delay(64); // wait for all characters to arrive
+  memset(str,0,sizeof(str)); // clear str
+  byte count=0;
+  while (Serial.available())
+  {
+    char c=Serial.read();
+    if (c>=32 && count<sizeof(str)-1)
+    {
+      str[count]=c;
+      count++;
+    }
+  }
+  str[count]='\0'; // make it a zero terminated string
+  return str;
 }
