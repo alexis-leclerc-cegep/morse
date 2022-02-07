@@ -6,8 +6,8 @@
 class MyMorse
 {
     private:
-        int pulseTime = 20; //pas été bon pour mettre en const 
-        int ledPin = 5;
+        int pulseTime = 100; //pas été bon pour mettre en const 
+        int ledPin = 2;
         void flash_dot_or_dash(char dot_or_dash);
         void flash_morse_code(char *morse_code);
 

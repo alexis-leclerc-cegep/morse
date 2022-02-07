@@ -13,6 +13,7 @@ MyMorse::MyMorse(int MyPulseTime, int MyLedPin){
     ledPin = MyLedPin;
 }
 
+
 char* MyMorse::letters[] = {
         ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..",    
         ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.",  

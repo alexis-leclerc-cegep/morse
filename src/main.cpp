@@ -2,14 +2,16 @@
 #include <string>
 #include "morse.h"
 
-const int LED = 5;
+const int LED_PIN = 23;
+const int PULSE_LENGTH = 50;
 char* serialString();
-MyMorse morse(LED, 20);
+MyMorse morse(50, LED_PIN);
+String readString;
 
 void setup() {
   // put your setup code here, to run once:
 
-  pinMode(LED, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
   Serial.begin(9600);
   Serial.println("Morse2Led");
   Serial.println("Programmed by Addison Sears-Collins");
@@ -20,6 +22,46 @@ void setup() {
 
 
 void loop() {
+
+  char ch;
+  if (Serial.available())
+  {
+    ch = Serial.read();
+    if (ch == '\n'){
+      Serial.print("\n");
+      morse.flash_string(readString);
+      Serial.print("\nEnter your message : ");
+      readString = "";
+    }
+    else{
+      Serial.print(ch);
+      readString += ch;   
+    }
+  }
+}
+
+
+
+
+
+
+  /*
+  while(Serial.available()){
+    delay(1);
+    char c = Serial.read();
+    if (c == 'a'){break;}
+    Serial.print(c);
+    readString += c;
+  }
+  if (readString.length() > 0)
+  {
+      Serial.println(readString);
+      Serial.println("yo");
+      readString = "";
+  }
+  
+  
+}
   static boolean needPrompt=true;
     char* userInput;
     if (needPrompt)
@@ -55,3 +97,4 @@ char* serialString()
   str[count]='\0'; // make it a zero terminated string
   return str;
 }
+*/
